@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>授权登录中...</title>
+  <script src="./axios.min.js"></script>
+</head>
+<body>
+  <span class="title">授权登录中...</span>
+  <script>
+
+    /**
+     * 返回一个query对象
+     */
+    function qs (search) {
+      var obj = {}
+      var query = search.slice(1)
+      query.split('&').forEacah(function (value) {
+        var arr = value.split('=')
+        obj[arr[0]] = arr[1]
+      })
+      return obj
+    }
+
+    var query = qs(location.search) // 一个包含所有query参数的对象
+    var localUrl = window.location.href
+    var route = query.route // 第一次进入必定携带的route参数， route为encode的实际路径
+    var code = query.code // 第二次进入时 经过微信授权处理并携带的code参数
+
+    if (route) {
+      if (code) {
+        var decodedRoute = decodeURIComponent(route)
+        var href = ''
+        // 判断route上是否已经携带query参数
+        if (decodedRoute.indexOf('?') === -1) {
+          href = decodedRoute + '?code=' + code + '&state=' + query.state
+        } else {
+          href = decodedRoute + '&code=' + code + '&state=' + query.state
+        }
+        window.location.replace(href);
+      } else {
+        axios({
+          url: 'https://longheng.baizitech.cn/longheng/auth/userLogin',
+          method: 'GET',
+          params: {
+            redirectUri: localUrl
+          }
+        }).then(function (res) {
+          window.location.replace(res.data);
+        })
+      }
+    }
+  </script>
+</body>
+</html>
